@@ -11,28 +11,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    - name: Update local toolchain
-      run: |
-        rustup update
-        rustup component add clippy
-    - name: Toolchain info
-      run: |
-        cargo --version --verbose
-        rustc --version
-        cargo clippy --version 
-    - name: Add wasm support
-      run: rustup target add wasm32-unknown-unknown
-    - name: Fetch rependencies
-      run: cargo fetch
-    - name: Test
-      run: cargo test
-      
+jobs: 
   build:
     runs-on: ubuntu-latest
 
@@ -51,8 +30,8 @@ jobs:
       run: rustup target add wasm32-unknown-unknown
     - name: Fetch rependencies
       run: cargo fetch
+    - name: Test
+      run: cargo test
     - name: Build
-      run: |
-        ls -R
-        ./build.sh
+      run: ./build.sh
         
