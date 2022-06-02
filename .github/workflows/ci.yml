@@ -16,12 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v2.4.2
+    - uses: actions/checkout@v3
     - name: Update local toolchain
       run: |
         rustup update
         rustup component add clippy
-        rustup install nightly   
     - name: Toolchain info
       run: |
         cargo --version --verbose
@@ -31,7 +30,9 @@ jobs:
       run: rustup target add wasm32-unknown-unknown
 #     - uses: jetli/wasm-pack-action@v0.3.0
     - name: test
-      run: cargo test --verbose
+      run: |
+        ls -R
+        cargo test --verbose
       
 #   build:
 #     runs-on: ubuntu-latest
