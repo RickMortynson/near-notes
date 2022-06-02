@@ -30,7 +30,9 @@ jobs:
       run: rustup target add wasm32-unknown-unknown
 #     - uses: jetli/wasm-pack-action@v0.3.0
     - name: check files
-      run: ls -R
+      run: |
+        cd ../../..
+        ls -R
     - name: test
       run: cargo test --verbose
       
