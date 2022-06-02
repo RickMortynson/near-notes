@@ -31,10 +31,10 @@ jobs:
 #     - uses: jetli/wasm-pack-action@v0.3.0
     - name: check files
       run: |
-        cd ../../..
+        cd ../
         ls -R
     - name: test
-      run: cargo test --verbose
+      run: cd .. && cargo test --verbose
       
 #   build:
 #     runs-on: ubuntu-latest
