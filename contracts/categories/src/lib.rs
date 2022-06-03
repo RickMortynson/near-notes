@@ -53,11 +53,6 @@ impl Categories {
     }
   }
 
-  fn create_empty_tasks_vector(&mut self, user_id: String) {
-    let new_category_vec = Vector::<Category>::new(b"t");
-    self.values.insert(&user_id, &new_category_vec);
-  }
-
   pub fn add_category(&mut self, user_id: String, category: Category) {
     // get existing user categories
     let user_categories = self.values.get(&user_id);
@@ -70,7 +65,8 @@ impl Categories {
       }
       None => {
         // if user does not have any category (key is missing), create empty vector & try to add new category again
-        self.create_empty_tasks_vector(user_id.clone());
+        let base_vector = Vector::<Category>::new(b"t");
+        self.values.insert(&user_id, &base_vector);
         // ...and add some recursiveness ✨✨✨
         self.add_category(user_id.clone(), category)
       }
