@@ -1,6 +1,5 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LookupMap, Vector};
-use near_sdk::json_types::U64;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{env, near_bindgen};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -16,7 +15,7 @@ pub struct Task {
   id: String,
   text: String,
   category_id: String,
-  timestamp: U64,
+  timestamp: u64,
 }
 
 // struct Categories stores individual list of categories for every user
@@ -34,16 +33,25 @@ impl Default for Tasks {
 
 #[near_bindgen]
 impl Tasks {
-  pub fn get_tasks(&mut self, user_id: String) -> Vec<Task> {
+  /// # Description
+  /// Creates the contract and inits empty Tasks LookupMap
+  #[init]
+  pub fn new() -> Self {
+    assert!(!env::state_exists(), "Already initialized");
+
+    let map = LookupMap::<String, Vector<Task>>::new(b"t");
+
+    Self { values: map }
+  }
+
+  pub fn get_tasks(&self, user_id: String) -> Vec<Task> {
     let user_tasks = self.values.get(&user_id);
     match user_tasks {
       Some(v) => return v.to_vec(),
       None => {
-        // If there were no categories, it means, it's user's first login.
-        // Thus, insert default category for this user and return it
+        // Return empty array if there is no notes, related to this user
 
         return Vec::new();
-        //
       }
     }
   }
@@ -52,15 +60,12 @@ impl Tasks {
     let since_the_epoch = SystemTime::now()
       .duration_since(UNIX_EPOCH)
       .expect("Time went backwards");
-    println!("{:?}", since_the_epoch);
 
     Task {
       id: Uuid::new_v4().to_string(),
       text,
       category_id,
-      timestamp: U64::from(
-        since_the_epoch.as_secs() * 1000 + since_the_epoch.subsec_nanos() as u64 / 1_000_000,
-      ),
+      timestamp: since_the_epoch.as_secs() * 1000 + since_the_epoch.subsec_nanos() as u64 / 1_000_000,
     }
   }
 

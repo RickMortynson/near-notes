@@ -81,7 +81,7 @@ fn get_tasks_empty_case() {
   let test_user = String::from("unicorn.testnet");
   let context = get_context(&test_user);
   testing_env!(context.clone());
-  let mut contract = get_test_tasks_empty_case();
+  let contract = get_test_tasks_empty_case();
 
   let got_tasks = contract.get_tasks(test_user.clone());
   println!("got tasks: {}", tasks_format_output(&got_tasks));
@@ -101,7 +101,7 @@ fn get_tasks_non_empty_case() {
     id: String::from("test-id"),
     text: String::from("test-text"),
     category_id: String::from("test-category_id"),
-    timestamp: U64::from(21u64)
+    timestamp: 21
   });
 
   contract.values.insert(&test_user.clone(), &tasks_vec);

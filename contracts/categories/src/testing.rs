@@ -114,7 +114,7 @@ fn get_categories() {
   let test_user = String::from("unicorn.testnet");
   let context = get_context(&test_user);
   testing_env!(context.clone());
-  let mut contract = get_test_categories_empty_case();
+  let contract = get_test_categories_empty_case();
 
   let got_categories = contract.get_categories(test_user);
   println!(
@@ -122,5 +122,5 @@ fn get_categories() {
     categories_format_output(&got_categories)
   );
   //
-  assert_eq!(got_categories.len() > 0, true);
+  assert_eq!(got_categories.len() == 0, true);
 }
