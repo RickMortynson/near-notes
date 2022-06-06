@@ -12,7 +12,7 @@ mod tasks;
 pub struct Task {
   id: u64,
   text: String,
-  category_id: String,
+  category_id: u64,
   timestamp: u64,
 }
 
@@ -56,7 +56,7 @@ impl Tasks {
     }
   }
 
-  fn generate_task_fields(id: u64, text: String, category_id: String) -> Task {
+  fn generate_task_fields(id: u64, text: String, category_id: u64) -> Task {
     Task {
       id,
       text,
@@ -66,7 +66,7 @@ impl Tasks {
     }
   }
 
-  pub fn add_task(&mut self, text: String, category_id: String) {
+  pub fn add_task(&mut self, text: String, category_id: u64) {
     // get existing user categories
     let user_id = env::signer_account_id();
     let user_categories = self.values.get(&user_id);

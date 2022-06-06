@@ -58,15 +58,9 @@ fn add_task() {
 
   let tasks_before = contract.get_tasks();
 
-  println!(
-    "tasks before: {}",
-    tasks_format_output(&tasks_before)
-  );
+  println!("tasks before: {}", tasks_format_output(&tasks_before));
 
-  contract.add_task(
-    String::from("test task text"),
-    String::from("test task category_id"),
-  );
+  contract.add_task(String::from("test task text"), 0);
 
   let tasks_after = contract.get_tasks();
 
@@ -97,14 +91,16 @@ fn get_tasks_non_empty_case() {
   let mut contract = get_test_tasks_empty_case();
 
   let mut tasks_vec = Vector::new(b"t");
-  tasks_vec.push(&Task{
+  tasks_vec.push(&Task {
     id: 0,
     text: String::from("test-text"),
-    category_id: String::from("test-category_id"),
-    timestamp: 21
+    category_id: 0,
+    timestamp: 21,
   });
 
-  contract.values.insert(&env::signer_account_id(), &tasks_vec);
+  contract
+    .values
+    .insert(&env::signer_account_id(), &tasks_vec);
 
   let got_tasks = contract.get_tasks();
   println!("got tasks: {}", tasks_format_output(&got_tasks));

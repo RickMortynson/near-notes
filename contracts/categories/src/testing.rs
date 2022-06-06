@@ -77,7 +77,7 @@ fn categories_format_output(categories: &Vec<Category>) -> String {
 
 fn get_testing_category() -> Category {
   Category {
-    id: String::from("testing_id"),
+    id: 0,
     title: String::from("testing_title"),
     color: String::from("testing_color"),
   }
@@ -98,7 +98,7 @@ fn add_category() {
 
   let test_category = get_testing_category();
   println!("adding category: {:?}", test_category);
-  contract.add_category(test_category);
+  contract.add_category(test_category.title, test_category.color);
   let categories_after = contract.get_categories();
 
   println!(

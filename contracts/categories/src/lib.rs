@@ -7,10 +7,10 @@ use near_sdk::{env, near_bindgen, AccountId};
 #[path = "./testing.rs"]
 mod categories;
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Category {
-  id: String,
+  id: u64,
   title: String,
   color: String,
 }
@@ -54,7 +54,7 @@ impl Categories {
     }
   }
 
-  pub fn add_category(&mut self, category: Category) {
+  pub fn add_category(&mut self, title: String, color: String) {
     // get existing user categories
     let user_id = env::signer_account_id();
     let user_categories = self.values.get(&user_id);
@@ -62,7 +62,11 @@ impl Categories {
     match user_categories {
       Some(mut v) => {
         // push new category to old vector, then replace old value
-        v.push(&category);
+        v.push(&Category {
+          id: v.len() + 1,
+          title,
+          color,
+        });
         self.values.insert(&user_id, &v);
       }
       None => {
@@ -70,7 +74,7 @@ impl Categories {
         let base_vector = Vector::<Category>::new(b"t");
         self.values.insert(&user_id, &base_vector);
         // ...and add some recursiveness ✨✨✨
-        self.add_category(category)
+        self.add_category(title, color)
       }
     }
   }
