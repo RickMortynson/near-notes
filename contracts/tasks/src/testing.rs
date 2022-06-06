@@ -11,7 +11,7 @@ fn get_context(account_id: &str) -> VMContext {
 }
 
 fn get_test_tasks_empty_case() -> Tasks {
-  let lm = LookupMap::<String, Vector<Task>>::new(b"l");
+  let lm = LookupMap::<AccountId, Vector<Task>>::new(b"l");
   Tasks { values: lm }
 }
 
@@ -56,7 +56,7 @@ fn add_task() {
   testing_env!(context.clone());
   let mut contract = get_test_tasks_empty_case();
 
-  let tasks_before = contract.get_tasks(test_user.clone());
+  let tasks_before = contract.get_tasks();
 
   println!(
     "tasks before: {}",
@@ -64,12 +64,11 @@ fn add_task() {
   );
 
   contract.add_task(
-    test_user.clone(),
     String::from("test task text"),
     String::from("test task category_id"),
   );
 
-  let tasks_after = contract.get_tasks(test_user.clone());
+  let tasks_after = contract.get_tasks();
 
   println!("tasks after: {}", tasks_format_output(&tasks_after));
   //
@@ -83,7 +82,7 @@ fn get_tasks_empty_case() {
   testing_env!(context.clone());
   let contract = get_test_tasks_empty_case();
 
-  let got_tasks = contract.get_tasks(test_user.clone());
+  let got_tasks = contract.get_tasks();
   println!("got tasks: {}", tasks_format_output(&got_tasks));
 
   assert_eq!(got_tasks.len() == 0, true);
@@ -93,20 +92,21 @@ fn get_tasks_empty_case() {
 fn get_tasks_non_empty_case() {
   let test_user = String::from("unicorn.testnet");
   let context = get_context(&test_user);
+
   testing_env!(context.clone());
   let mut contract = get_test_tasks_empty_case();
 
   let mut tasks_vec = Vector::new(b"t");
   tasks_vec.push(&Task{
-    id: String::from("test-id"),
+    id: 0,
     text: String::from("test-text"),
     category_id: String::from("test-category_id"),
     timestamp: 21
   });
 
-  contract.values.insert(&test_user.clone(), &tasks_vec);
+  contract.values.insert(&env::signer_account_id(), &tasks_vec);
 
-  let got_tasks = contract.get_tasks(test_user.clone());
+  let got_tasks = contract.get_tasks();
   println!("got tasks: {}", tasks_format_output(&got_tasks));
 
   assert_eq!(got_tasks.len() == 1, true);

@@ -1,7 +1,7 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LookupMap, Vector};
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{env, near_bindgen};
+use near_sdk::{env, near_bindgen, AccountId};
 
 #[cfg(test)]
 #[path = "./testing.rs"]
@@ -19,7 +19,7 @@ pub struct Category {
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Categories {
-  values: LookupMap<String, Vector<Category>>,
+  values: LookupMap<AccountId, Vector<Category>>,
 }
 
 impl Default for Categories {
@@ -36,13 +36,14 @@ impl Categories {
   pub fn new() -> Self {
     assert!(!env::state_exists(), "Already initialized");
 
-    let map = LookupMap::<String, Vector<Category>>::new(b"l");
+    let map = LookupMap::<AccountId, Vector<Category>>::new(b"l");
 
     Self { values: map }
   }
 
-  pub fn get_categories(&self, user_id: String) -> Vec<Category> {
+  pub fn get_categories(&self) -> Vec<Category> {
     // let mut user_categories = Vec::new();
+    let user_id = env::signer_account_id();
     let user_categories = self.values.get(&user_id);
     match user_categories {
       Some(v) => return v.to_vec(),
@@ -53,8 +54,9 @@ impl Categories {
     }
   }
 
-  pub fn add_category(&mut self, user_id: String, category: Category) {
+  pub fn add_category(&mut self, category: Category) {
     // get existing user categories
+    let user_id = env::signer_account_id();
     let user_categories = self.values.get(&user_id);
 
     match user_categories {
@@ -68,7 +70,7 @@ impl Categories {
         let base_vector = Vector::<Category>::new(b"t");
         self.values.insert(&user_id, &base_vector);
         // ...and add some recursiveness ✨✨✨
-        self.add_category(user_id.clone(), category)
+        self.add_category(category)
       }
     }
   }

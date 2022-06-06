@@ -4,7 +4,7 @@ use near_sdk::test_utils::VMContextBuilder;
 use near_sdk::{testing_env, AccountId, VMContext};
 
 fn get_test_categories_empty_case() -> Categories {
-  let lm = LookupMap::<String, Vector<Category>>::new(b"l");
+  let lm = LookupMap::<AccountId, Vector<Category>>::new(b"l");
   Categories { values: lm }
 }
 
@@ -90,7 +90,7 @@ fn add_category() {
   testing_env!(context.clone());
   let mut contract = get_test_categories_empty_case();
 
-  let categories_before = contract.get_categories(test_user.clone());
+  let categories_before = contract.get_categories();
   println!(
     "categories before: {}",
     categories_format_output(&categories_before)
@@ -98,8 +98,8 @@ fn add_category() {
 
   let test_category = get_testing_category();
   println!("adding category: {:?}", test_category);
-  contract.add_category(test_user.clone(), test_category);
-  let categories_after = contract.get_categories(test_user.clone());
+  contract.add_category(test_category);
+  let categories_after = contract.get_categories();
 
   println!(
     "categories after: {}",
@@ -116,7 +116,7 @@ fn get_categories() {
   testing_env!(context.clone());
   let contract = get_test_categories_empty_case();
 
-  let got_categories = contract.get_categories(test_user);
+  let got_categories = contract.get_categories();
   println!(
     "got categories: {}",
     categories_format_output(&got_categories)

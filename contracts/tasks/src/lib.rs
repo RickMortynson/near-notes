@@ -1,9 +1,7 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LookupMap, Vector};
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{env, near_bindgen};
-use std::time::{SystemTime, UNIX_EPOCH};
-use uuid::Uuid;
+use near_sdk::{env, near_bindgen, AccountId};
 
 #[cfg(test)]
 #[path = "./testing.rs"]
@@ -12,7 +10,7 @@ mod tasks;
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Task {
-  id: String,
+  id: u64,
   text: String,
   category_id: String,
   timestamp: u64,
@@ -22,7 +20,7 @@ pub struct Task {
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Tasks {
-  values: LookupMap<String, Vector<Task>>,
+  values: LookupMap<AccountId, Vector<Task>>,
 }
 
 impl Default for Tasks {
@@ -39,13 +37,15 @@ impl Tasks {
   pub fn new() -> Self {
     assert!(!env::state_exists(), "Already initialized");
 
-    let map = LookupMap::<String, Vector<Task>>::new(b"t");
+    let map = LookupMap::<AccountId, Vector<Task>>::new(b"t");
 
     Self { values: map }
   }
 
-  pub fn get_tasks(&self, user_id: String) -> Vec<Task> {
+  pub fn get_tasks(&self) -> Vec<Task> {
+    let user_id = env::signer_account_id();
     let user_tasks = self.values.get(&user_id);
+
     match user_tasks {
       Some(v) => return v.to_vec(),
       None => {
@@ -56,34 +56,37 @@ impl Tasks {
     }
   }
 
-  fn generate_task_fields(text: String, category_id: String) -> Task {
-    let since_the_epoch = SystemTime::now()
-      .duration_since(UNIX_EPOCH)
-      .expect("Time went backwards");
-
+  fn generate_task_fields(id: u64, text: String, category_id: String) -> Task {
     Task {
-      id: Uuid::new_v4().to_string(),
+      id,
       text,
       category_id,
-      timestamp: since_the_epoch.as_secs() * 1000 + since_the_epoch.subsec_nanos() as u64 / 1_000_000,
+      timestamp: env::block_timestamp()
+      // timestamp: since_the_epoch
     }
   }
 
-  pub fn add_task(&mut self, user_id: String, text: String, category_id: String) {
+  pub fn add_task(&mut self, text: String, category_id: String) {
     // get existing user categories
+    let user_id = env::signer_account_id();
     let user_categories = self.values.get(&user_id);
 
     match user_categories {
       Some(mut v) => {
         // push new category to old vector, then replace old value
-        v.push(&Tasks::generate_task_fields(text, category_id));
+        let vector_length = v.len();
+        let new_task = Tasks::generate_task_fields(vector_length, text, category_id);
+        env::log_str(format!("generated task with id = {}", new_task.id.to_string()).as_str());
+        v.push(&new_task);
+
         self.values.insert(&user_id, &v);
       }
       None => {
+        // if user had no category with this name before
         let base_vector = Vector::<Task>::new(b"t");
         self.values.insert(&user_id, &base_vector);
         // add some recursiveness ✨✨✨
-        self.add_task(user_id.clone(), text, category_id)
+        self.add_task(text, category_id)
       }
     }
   }
