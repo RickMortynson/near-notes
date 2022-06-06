@@ -86,11 +86,13 @@ fn get_testing_category() -> Category {
 #[test]
 fn add_category() {
   let test_user = String::from("unicorn.testnet");
+  let account_id = AccountId::try_from(test_user.clone()).unwrap();
   let context = get_context(&test_user);
+
   testing_env!(context.clone());
   let mut contract = get_test_categories_empty_case();
 
-  let categories_before = contract.get_categories();
+  let categories_before = contract.get_categories(account_id.clone());
   println!(
     "categories before: {}",
     categories_format_output(&categories_before)
@@ -99,7 +101,7 @@ fn add_category() {
   let test_category = get_testing_category();
   println!("adding category: {:?}", test_category);
   contract.add_category(test_category.title, test_category.color);
-  let categories_after = contract.get_categories();
+  let categories_after = contract.get_categories(account_id.clone());
 
   println!(
     "categories after: {}",
@@ -113,10 +115,12 @@ fn add_category() {
 fn get_categories() {
   let test_user = String::from("unicorn.testnet");
   let context = get_context(&test_user);
+  let account_id = AccountId::try_from(test_user).unwrap();
+
   testing_env!(context.clone());
   let contract = get_test_categories_empty_case();
 
-  let got_categories = contract.get_categories();
+  let got_categories = contract.get_categories(account_id);
   println!(
     "got categories: {}",
     categories_format_output(&got_categories)

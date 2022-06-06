@@ -42,9 +42,13 @@ impl Tasks {
     Self { values: map }
   }
 
-  pub fn get_tasks(&self) -> Vec<Task> {
-    let user_id = env::signer_account_id();
-    let user_tasks = self.values.get(&user_id);
+  /// * resets current user' tasks LookupMap
+  pub fn reset(&mut self) {
+    self.values.remove(&env::signer_account_id());
+  }
+
+  pub fn get_tasks(&self, account_id: AccountId) -> Vec<Task> {
+    let user_tasks = self.values.get(&account_id);
 
     match user_tasks {
       Some(v) => return v.to_vec(),
@@ -61,8 +65,7 @@ impl Tasks {
       id,
       text,
       category_id,
-      timestamp: env::block_timestamp()
-      // timestamp: since_the_epoch
+      timestamp: env::block_timestamp(), // timestamp: since_the_epoch
     }
   }
 

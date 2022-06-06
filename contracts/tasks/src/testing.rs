@@ -53,16 +53,18 @@ fn tasks_format_output(tasks: &Vec<Task>) -> String {
 fn add_task() {
   let test_user = String::from("unicorn.testnet");
   let context = get_context(&test_user);
+  let account_id = AccountId::try_from(test_user).unwrap();
+
   testing_env!(context.clone());
   let mut contract = get_test_tasks_empty_case();
 
-  let tasks_before = contract.get_tasks();
+  let tasks_before = contract.get_tasks(account_id.clone());
 
   println!("tasks before: {}", tasks_format_output(&tasks_before));
 
   contract.add_task(String::from("test task text"), 0);
 
-  let tasks_after = contract.get_tasks();
+  let tasks_after = contract.get_tasks(account_id.clone());
 
   println!("tasks after: {}", tasks_format_output(&tasks_after));
   //
@@ -73,10 +75,12 @@ fn add_task() {
 fn get_tasks_empty_case() {
   let test_user = String::from("unicorn.testnet");
   let context = get_context(&test_user);
+  let account_id = AccountId::try_from(test_user).unwrap();
+
   testing_env!(context.clone());
   let contract = get_test_tasks_empty_case();
 
-  let got_tasks = contract.get_tasks();
+  let got_tasks = contract.get_tasks(account_id);
   println!("got tasks: {}", tasks_format_output(&got_tasks));
 
   assert_eq!(got_tasks.len() == 0, true);
@@ -86,6 +90,7 @@ fn get_tasks_empty_case() {
 fn get_tasks_non_empty_case() {
   let test_user = String::from("unicorn.testnet");
   let context = get_context(&test_user);
+  let account_id = AccountId::try_from(test_user).unwrap();
 
   testing_env!(context.clone());
   let mut contract = get_test_tasks_empty_case();
@@ -102,7 +107,7 @@ fn get_tasks_non_empty_case() {
     .values
     .insert(&env::signer_account_id(), &tasks_vec);
 
-  let got_tasks = contract.get_tasks();
+  let got_tasks = contract.get_tasks(account_id);
   println!("got tasks: {}", tasks_format_output(&got_tasks));
 
   assert_eq!(got_tasks.len() == 1, true);

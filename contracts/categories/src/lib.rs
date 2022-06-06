@@ -30,7 +30,7 @@ impl Default for Categories {
 
 #[near_bindgen]
 impl Categories {
-  /// # Description
+  /// ## Description
   /// Creates the contract and inits empty categories LookupMap
   #[init]
   pub fn new() -> Self {
@@ -41,10 +41,14 @@ impl Categories {
     Self { values: map }
   }
 
-  pub fn get_categories(&self) -> Vec<Category> {
+  /// * resets current user' categories LookupMap
+  pub fn reset(&mut self) {
+    self.values.remove(&env::signer_account_id());
+  }
+
+  pub fn get_categories(&self, account_id: AccountId) -> Vec<Category> {
     // let mut user_categories = Vec::new();
-    let user_id = env::signer_account_id();
-    let user_categories = self.values.get(&user_id);
+    let user_categories = self.values.get(&account_id);
     match user_categories {
       Some(v) => return v.to_vec(),
       None => {
